@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-navbar color="darkbar">
+    <ion-buttons start>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Add Availability</ion-title>
+    <ion-buttons end>
+      <button ion-button (click)="signout()" color='danger'>
+        Sign Out
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content class='content-home'>
+  <ion-refresher (ionRefresh)="doRefresh($event)" [enabled]="auth.isUserSignedIn()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card *ngIf="!auth.isUserSignedIn()" color="light">
+    <ion-card-content>
+      Sign In to see your contacts
+    </ion-card-content>
+  </ion-card>
+
+     <ion-list> 
+      <ng-container *ngFor="let home of home_Store.home| async; let idx = index">
+        <ion-card>
+    <ion-item-sliding>
+          <ion-item>
+            <ion-label fixed>Start Time</ion-label>
+            <ion-datetime displayFormat="DD-MM-YYYY HH:mm" name="StartTimeStamp" value = "" [(ngModel)]="data.StartTimeStamp" #StartTimeStamp="ngModel"></ion-datetime>
+          </ion-item>
+          <ion-item>
+            <ion-label fixed>End Time</ion-label>
+            <ion-datetime displayFormat="DD-MM-YYYY HH:mm" name="EndTimeStamp" value= "" [(ngModel)]="data.EndTimeStamp" #EndTimeStamp="ngModel"></ion-datetime>
+          </ion-item>
+          <ion-item>
+            <ion-label fixed>Status</ion-label>
+            <ion-input type="text" name="Description" required value = "" [(ngModel)]="data.Description"#Description="ngModel" ></ion-input>
+          </ion-item>
+          <ion-item-options side="right">
+            <button ion-button icon-only padding-horizontal color="danger" (click)="deleteTask(event)">
+              <ion-icon name="trash"></ion-icon>
+            </button>
+          </ion-item-options>
+          <ion-item-options side="left">
+            <button ion-button icon-only padding-horizontal color="secondary" (click)="AddAvailabilityEmpty(data)">
+              <ion-icon name="checkmark"></ion-icon>
+            </button>
+          </ion-item-options>
+        </ion-item-sliding>
+
+      </ion-card>
+      </ng-container>
+    </ion-list>
+</ion-content>

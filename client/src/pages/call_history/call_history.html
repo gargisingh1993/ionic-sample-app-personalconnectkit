@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-navbar color="darkbar">
+    <ion-buttons end>
+    <button ion-button icon-only clear (click)="openModal()"  [color]="userColor">
+      <ion-icon name="person"></ion-icon>
+    </button>
+  </ion-buttons>
+  <ion-title text-center>History</ion-title>
+  <ion-buttons left>
+    <button ion-button icon-only clear (click)="openModalcontact()"  [color]="userColor">
+      <ion-icon name="contacts"></ion-icon>
+    </button>
+  </ion-buttons>
+  </ion-navbar>
+</ion-header> 
+
+<ion-content>
+  <ion-refresher (ionRefresh)="doRefresh($event)" [enabled]="auth.isUserSignedIn()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card *ngIf="!auth.isUserSignedIn()" color="light">
+    <ion-card-content>
+      Sign In to see your caller history
+    </ion-card-content>
+  </ion-card>
+
+  <div *ngIf="auth.isUserSignedIn()">
+    <div *ngIf="(size | async) === 0" color="light">
+      <h1 text-center class="xxl soft"><ion-icon name="archive"></ion-icon></h1>
+      <h3 text-center class="soft"> You do not have any calls </h3>
+    </div>
+
+    <div *ngIf="(size | async) > 0">
+      <ion-list> 
+        <ion-list-header class="danger-text">
+          History
+        </ion-list-header>
+        <ng-container *ngFor="let call_history of call_history_Store.call_history | async; let idx = index" >
+          <ion-card>
+          <ion-item-sliding *ngIf="call_history.ContactInfo">
+            <ion-item color="light">
+              <h5>{{call_history.ContactInfo.ContactName}} - <b>{{call_history.ContactInfo.Contact}}</b></h5>
+              <h5><i>{{call_history.ContactInfo.Company}}</i> - {{call_history.ContactInfo.ContactId}}</h5>
+            <button *ngIf="call_history.Analysis" ion-button item-right (click)="openModalAnalytics(call_history)" end>
+                  <ion-icon name="analytics"></ion-icon>
+            </button>
+        </ion-item>
+          </ion-item-sliding>
+        </ion-card>
+        </ng-container>
+      </ion-list>
+    </div>
+  </div>
+</ion-content>

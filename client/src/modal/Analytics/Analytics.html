@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-navbar color="darkbar">
+    <ion-buttons start>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Analytics</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content class='content-home'>
+      <ion-refresher (ionRefresh)="doRefresh($event)" [enabled]="auth.isUserSignedIn()">
+        <ion-refresher-content></ion-refresher-content>
+      </ion-refresher>
+
+      <ion-card *ngIf="!auth.isUserSignedIn()" color="light">
+        <ion-card-content>
+          Sign In to see your contacts
+        </ion-card-content>
+      </ion-card>
+
+     <ion-list> 
+      <ng-container *ngIf="data">
+              <ion-card>
+                <ion-card-content>
+                  <h3 text-center > <b>Message</b> </h3>
+                  <h4> {{data.Message}} </h4>
+                </ion-card-content>
+            </ion-card>
+          <ion-card>
+              <ion-card-content>
+                <h3 text-center> <b>Time of Message</b></h3>
+                <h4>{{data.Timestamp}}</h4>
+              </ion-card-content>
+          </ion-card>
+       </ng-container>
+
+      <ion-card color="light">
+        <ion-title fixed center> Sentiment </ion-title>  
+            <ng-container *ngIf="data.Analysis">
+                <ion-item>
+                  <ion-label fixed> Positive Score </ion-label>
+                  <ion-input type="text" name="Description" required [(ngModel)]="data.Analysis.sentiment.Positive" #Description="ngModel"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label fixed> Negative Score </ion-label>
+                  <ion-input type="text" name="Description" required [(ngModel)]="data.Analysis.sentiment.Negative" #Description="ngModel"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label fixed> Neutral Score </ion-label>
+                  <ion-input type="text" name="Description" required [(ngModel)]="data.Analysis.sentiment.Neutral" #Description="ngModel"></ion-input>
+                </ion-item>
+              </ng-container>
+      </ion-card>  
+
+      <ion-card color="light">
+        <ion-title fixed center> Key Phrases </ion-title>
+             <ng-container *ngFor="let key_phrase of data.Analysis.key_phrases; let idx = index">
+                <ion-item>
+                  <ion-input [(ngModel)]="data.Analysis.key_phrases[idx].Text"></ion-input>
+                </ion-item>
+            </ng-container>
+      </ion-card>
+</ion-list>
+</ion-content>

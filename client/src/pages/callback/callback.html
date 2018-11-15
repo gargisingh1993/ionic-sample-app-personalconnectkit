@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-navbar color="darkbar">
+    <ion-buttons end>
+    <button ion-button icon-only clear (click)="openModal()"  [color]="userColor">
+      <ion-icon name="person"></ion-icon>
+    </button>
+  </ion-buttons>
+  <ion-title text-center>Callback Request</ion-title>
+  <ion-buttons left>
+    <button ion-button icon-only clear (click)="openModalcontact()"  [color]="userColor">
+      <ion-icon name="contacts"></ion-icon>
+    </button>
+  </ion-buttons>
+  </ion-navbar>
+</ion-header> 
+
+<ion-content>
+  <ion-refresher (ionRefresh)="doRefresh($event)" [enabled]="auth.isUserSignedIn()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card *ngIf="!auth.isUserSignedIn()" color="light">
+    <ion-card-content>
+      Sign In to see your callback requests
+    </ion-card-content>
+  </ion-card>
+
+  <div *ngIf="auth.isUserSignedIn()">
+    <div *ngIf="(size | async) === 0" color="light">
+      <h1 text-center class="xxl soft"><ion-icon name="archive"></ion-icon></h1>
+      <h3 text-center class="soft"> You do not have any callback requests </h3>
+    </div>
+
+    <div *ngIf="(size | async) > 0">
+      <ion-list> 
+        <ion-list-header class="danger-text">
+          Callback Request
+        </ion-list-header>
+        <ng-container *ngFor="let callback of callback_Store.callback | async; let idx = index" >
+          <ion-card>
+          <ion-item-sliding *ngIf="callback.ContactId">
+            <ion-item color="light">
+              <h3 left><b>{{callback.ContactInfo.ContactName}}</b> - <b> {{callback.ContactInfo.Company}}</b></h3>
+              <h3 left><b>{{callback.CallbackRequestTime}}</b></h3>
+              <button ion-button round outline item-right (click)="update_callback(idx)" end>{{callback.ContactId}}
+            </button>
+            </ion-item>
+            <ion-item-options side="right">
+              <button ion-button icon-only padding-horizontal color="danger" (click)="delete_callback(idx)">
+                <ion-icon name="trash"></ion-icon>
+              </button>
+            </ion-item-options>
+            <ion-item-options side="left">
+              <button ion-button icon-only padding-horizontal color="secondary" (click)="update_callback(idx)">
+                <ion-icon name="checkmark"></ion-icon>
+              </button>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-card>
+        </ng-container>
+      </ion-list>
+    </div>
+  </div>
+</ion-content>

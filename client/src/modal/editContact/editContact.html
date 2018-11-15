@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-navbar color="darkbar">
+    <ion-buttons start>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Your Account</ion-title>
+    <ion-buttons end>
+      <button ion-button (click)="signout()" color='danger'>
+        Sign Out
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-refresher (ionRefresh)="doRefresh($event)" [enabled]="auth.isUserSignedIn()">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card *ngIf="!auth.isUserSignedIn()" color="light">
+    <ion-card-content>
+      Sign In to see your contacts
+    </ion-card-content>
+  </ion-card>
+
+    <ion-list-header class="danger-text" color="light">
+      Contacts
+    </ion-list-header>
+      <ion-list> 
+        <ng-container *ngFor="let editContact of editContact_Store.editContact | async; let idx = index" >
+          <ion-card>
+          <ion-item-sliding *ngIf="editContact.ContactId">
+          <ion-item color="light">
+            <ion-label fixed>Name</ion-label>
+            <ion-input type="text" name="ContactName" required [(ngModel)]="editContact.ContactInformation.ContactName" #ContactName="ngModel"></ion-input>
+          </ion-item>
+          <ion-item >
+            <ion-label fixed>Number</ion-label>
+            <ion-input type="text" name="ContactId" required [(ngModel)]="editContact.ContactId" #ContactId="ngModel"></ion-input><br>
+          </ion-item>
+          <ion-item >
+            <ion-label fixed>Company</ion-label>
+            <ion-input type="text" name="Company" required [(ngModel)]="editContact.ContactInformation.Company" #Company="ngModel"></ion-input><br>
+          </ion-item>
+          <ion-item >
+            <ion-label fixed>Status</ion-label>
+            <ion-input type="text" name="ContactStatus" required [(ngModel)]="editContact.ContactInformation.ContactStatus" #ContactStatus="ngModel"></ion-input><br>
+          </ion-item>
+          <ion-item-divider color="dark">A</ion-item-divider>
+            <ion-item-options side="left">
+              <button ion-button icon-only padding-horizontal color="secondary" (click)="updateContact(idx)">
+                <ion-icon name="checkmark"></ion-icon>
+              </button>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-card>
+        </ng-container>
+      </ion-list>
+
+</ion-content>
