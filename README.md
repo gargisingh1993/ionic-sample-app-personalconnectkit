@@ -33,13 +33,13 @@ AWS Services used:
 
 ## Getting started
 
-First clone this repo: `git clone https://github.com/gargisingh1993/ionic-sample-master-subtree`
+First clone this repo: `git clone https://github.com/gargisingh1993/ionic-sample-app-personalconnectkit`
 
 ### Backend setup
 
 1. Set up your AWS resources using AWS Mobile Hub by clicking the button below:
 
-    [![Deploy to AWS Mobile Hub](https://s3.amazonaws.com/deploytomh/button-deploy-aws-mh.png)](https://console.aws.amazon.com/mobilehub/home?#/?config=https://github.com/gargisingh1993/ionic-sample-master-subtree/blob/master/backend/import_mobilehub/ionic-sample-app.zip)
+    [![Deploy to AWS Mobile Hub](https://s3.amazonaws.com/deploytomh/button-deploy-aws-mh.png)](https://console.aws.amazon.com/mobilehub/home?#/?config=https://github.com/gargisingh1993/ionic-sample-app-personalconnectkit/blob/master/backend/import_mobilehub/ionic-sample-app.zip)
 
 1. Update the preselected name of your project if necessary and take note of the region in which your resources are created in. Press **Import project**.
 
@@ -51,7 +51,7 @@ First clone this repo: `git clone https://github.com/gargisingh1993/ionic-sample
 
 1.  Click **Configure** on the left hand bar of the console and select the **Hosting and Streaming tile**.
 
-1.  At the bottom of the page click **Download aws-config.js file**. Copy this file into the `./ionic-sample-master-subtree/client/src/assets/` folder of the repo you cloned.
+1.  At the bottom of the page click **Download aws-config.js file**. Copy this file into the `./ionic-sample-app-personalconnectkit/client/src/assets/` folder of the repo you cloned.
 
     * Alternatively, click **Resources** on the left hand bar and in the **Amazon S3 Buckets** tile, copy the name of your _hosting_ bucket.
 
@@ -60,10 +60,10 @@ First clone this repo: `git clone https://github.com/gargisingh1993/ionic-sample
       Then, using the CLI:
 
       ```bash
-      aws s3api get-object --bucket <YOUR_BUCKET_NAME> --key aws-config.js ./ionic-sample-master-subtree/client/src/assets/aws-config.js
+      aws s3api get-object --bucket <YOUR_BUCKET_NAME> --key aws-config.js ./ionic-sample-app-personalconnectkit/client/src/assets/aws-config.js
       ```
 
-1.  Navigate into  `./ionic-sample-master-subtree/client` and run:
+1.  Navigate into  `./ionic-sample-app-personalconnectkit/client` and run:
 
     ```bash
     npm install
@@ -89,20 +89,20 @@ First clone this repo: `git clone https://github.com/gargisingh1993/ionic-sample
 
 The following steps outline how you can build and deploy the application to a hosted webserver with global CDN on AWS (using S3 and CloudFront) created by the Import phase above:
 
-1.  Navigate to `./ionic-sample-master-subtree/client` and build for production by running:
+1.  Navigate to `./ionic-sample-app-personalconnectkit/client` and build for production by running:
 
     ```bash
     npm run build
     ```
 
-2.  Copy everything within the produced `./ionic-sample-master-subtree/client/www` directory to the S3 bucket that was created earlier. You can do this one of two ways:
+2.  Copy everything within the produced `./ionic-sample-app-personalconnectkit/client/www` directory to the S3 bucket that was created earlier. You can do this one of two ways:
 
-    - Via the Mobile Hub console select the **Hosting and Streaming** section of your project, click **Manage Files** at the bottom which will open the S3 console. Click **Upload** and then **Add files** selecting everything inside the `./ionic-sample-master-subtree/client/www` directory. Press **Upload**.
+    - Via the Mobile Hub console select the **Hosting and Streaming** section of your project, click **Manage Files** at the bottom which will open the S3 console. Click **Upload** and then **Add files** selecting everything inside the `./ionic-sample-app-personalconnectkit/client/www` directory. Press **Upload**.
 
     - Via the AWS CLI, using the name of the hosting bucket (see [Client Setup](#client-setup) for instructions on how to get the bucket name)
 
       ```bash
-      aws s3 cp --recursive ./ionic-sample-master-subtree/client/www s3://<YOUR_BUCKET_NAME>
+      aws s3 cp --recursive ./ionic-sample-app-personalconnectkit/client/www s3://<YOUR_BUCKET_NAME>
       ```
 
 3. To view your website, in the Mobile Hub console select the **Hosting and Streaming** section and click the **View from S3** to see your page immediately or **View from CloudFront** to see using a CDN (_note: this might be immediate or take up to an hour_).
