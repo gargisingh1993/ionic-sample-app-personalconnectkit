@@ -1,0 +1,282 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "My API Gateway and Lambda function"
+
+Parameters:
+  apiGatewayStageName:
+    Type: "String"
+    AllowedPattern: "^[a-z0-9]+$"
+    Default: "prod"
+
+  lambdaGetContactsArn:
+    Type: "String"
+    Default: "my-function"
+  lambdaUpdateContactArn:
+    Type: "String"
+    Default: "my-function"    
+  lambdaRemoveCallbackArn:
+    Type: "String"
+    Default: "my-function"
+  lambdaAllowCallArn:
+    Type: "String"
+    Default: "my-function"
+  lambdaInitiateCallbackArn:
+    Type: "String"
+    Default: "my-function"
+  lambdaPutAvailabilityArn:
+    Type: "String"
+    Default: "my-function"
+  lambdaGetAvailabilityArn:
+    Type: "String"
+    Default: "my-function"
+  lambdaSaveMessageArn:
+    Type: "String"
+    Default: "my-function"
+
+Resources:
+  apiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "contact-bot-api"
+      Description: "My API"
+
+  apiGatewayGetContactsResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "get-contacts"
+      RestApiId: !Ref apiGateway
+  apiGatewayyGetContactsMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaGetContactsArn}/invocations"
+      ResourceId: !Ref apiGatewayGetContactsResource
+      RestApiId: !Ref "apiGateway"
+
+  apiGatewayUpdateContactResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "update-contact"
+      RestApiId: !Ref apiGateway
+  apiGatewayyUpdateContactMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaUpdateContactArn}/invocations"
+      ResourceId: !Ref apiGatewayUpdateContactResource
+      RestApiId: !Ref "apiGateway"
+
+  apiGatewayRemoveCallbackResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "remove-callback"
+      RestApiId: !Ref apiGateway
+  apiGatewayyRemoveCallbackMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaRemoveCallbackArn}/invocations"
+      ResourceId: !Ref apiGatewayRemoveCallbackResource
+      RestApiId: !Ref "apiGateway"
+
+  apiGatewayAllowCallResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "allow-call"
+      RestApiId: !Ref apiGateway
+  apiGatewayyAllowCallMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaAllowCallArn}/invocations"
+      ResourceId: !Ref apiGatewayAllowCallResource
+      RestApiId: !Ref "apiGateway"
+  apiGatewayyAllowCallMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "GET"
+      Integration:
+        IntegrationHttpMethod: "GET"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaAllowCallArn}/invocations"
+      ResourceId: !Ref apiGatewayAllowCallResource
+      RestApiId: !Ref "apiGateway"
+
+  apiGatewayInitiateCallbackResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "initiate-callback"
+      RestApiId: !Ref apiGateway
+  apiGatewayInitiateCallbackMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaInitiateCallbackArn}/invocations"
+      ResourceId: !Ref apiGatewayInitiateCallbackResource
+      RestApiId: !Ref "apiGateway"
+
+  apiGatewayPutAvailabilityResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "put-availability"
+      RestApiId: !Ref apiGateway
+  apiGatewayPutAvailabilityMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaPutAvailabilityArn}/invocations"
+      ResourceId: !Ref apiGatewayPutAvailabilityResource
+      RestApiId: !Ref "apiGateway"
+
+  apiGatewayGetAvailabilityResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "get-availability"
+      RestApiId: !Ref apiGateway
+  apiGatewayGetAvailabilityMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "AWS_IAM"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaGetAvailabilityArn}/invocations"
+      ResourceId: !Ref apiGatewayGetAvailabilityResource
+      RestApiId: !Ref "apiGateway"
+
+  apiGatewaySaveMessageResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: "save-message"
+      RestApiId: !Ref apiGateway
+  apiGatewaySaveMessageMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaSaveMessageArn}/invocations"
+      ResourceId: !Ref apiGatewaySaveMessageResource
+      RestApiId: !Ref "apiGateway"
+
+
+
+  apiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - "apiGatewayyAllowCallMethod"
+      - "apiGatewayyRemoveCallbackMethod"
+      - "apiGatewayyUpdateContactMethod"
+      - "apiGatewayyGetContactsMethod"
+      - "apiGatewayInitiateCallbackMethod"
+      - "apiGatewayPutAvailabilityMethod"
+      - "apiGatewayGetAvailabilityMethod"
+      - "apiGatewaySaveMessageMethod"
+    Properties:
+      RestApiId: !Ref "apiGateway"
+      StageName: !Ref "apiGatewayStageName"
+
+  
+  lambdaApiGatewayInvoke1:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaGetContactsArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/get-contacts"
+  lambdaApiGatewayInvoke2:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaUpdateContactArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/update-contact"
+  lambdaApiGatewayInvoke3:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaRemoveCallbackArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/remove-callback"
+  lambdaApiGatewayInvoke4:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaAllowCallArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/allow-call"  
+  lambdaApiGatewayInvoke41:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaAllowCallArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/GET/allow-call"  
+  lambdaApiGatewayInvoke5:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaInitiateCallbackArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/initiate-callback"  
+  lambdaApiGatewayInvoke6:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaPutAvailabilityArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/put-availability"  
+  lambdaApiGatewayInvoke7:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaGetAvailabilityArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/get-availability"  
+  lambdaApiGatewayInvoke8:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref lambdaSaveMessageArn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/save-message"  
+Outputs:
+  apiGatewayInvokeURL:
+    Value: !Sub "https://${apiGateway}.execute-api.${AWS::Region}.amazonaws.com/${apiGatewayStageName}"
+
+
