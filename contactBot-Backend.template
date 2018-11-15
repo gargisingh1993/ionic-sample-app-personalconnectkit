@@ -1,0 +1,340 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  'AWS::CloudFormation::Designer':
+    f7dc389e-dee3-490f-abc3-99b7271ace09:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: -13.162478027636272
+        'y': 200.44459620024577
+      z: 0
+      embeds: []
+    0c073e58-022d-4884-a044-9384521492e0:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: -10
+        'y': 300
+      z: 0
+      embeds: []
+    44768a4b-9921-4ee2-a852-8787f700fca5:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: -35.32872588407411
+        'y': 386.08692199791267
+      z: 0
+Parameters:
+  TemplateBucket:
+    Type: String
+    Description: s3 bucket of cloudformation templates and lambda code
+  ZipCodeName:
+    Type: String
+    Default: code.zip
+    Description: random name for the code deployment
+  CallbackContactFlowId:
+    Type: String
+    Description: The contact flow id or GUID for the callback contact flow
+  InstanceId:
+    Type: String
+    Description: The GUID for the connect instance
+  ContactInstancePhoneNumber:
+    Type: String
+    Description: The dedicated phone number for the contact center owner
+  OwnersPhoneNumber:
+    Type: String
+    Description: Your phone number
+
+  S3StaticBucket:
+    Type: String
+
+  
+
+Resources:
+  SNSTopic:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        SubscriberNumber: !Ref OwnersPhoneNumber
+      TemplateURL: !Sub 
+          - https://s3.amazonaws.com/${TempBucket}/SNS-topic.template
+          - {TempBucket: !Ref TemplateBucket }
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: f7dc389e-dee3-490f-abc3-99b7271ace09
+  IAMRoles:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub 
+          - https://s3.amazonaws.com/${TempBucket}/IAM-lambda.template
+          - {TempBucket: !Ref TemplateBucket }
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 0c073e58-022d-4884-a044-9384521492e0
+  ContactTables:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties: 
+      TemplateURL: !Sub 
+          - https://s3.amazonaws.com/${TempBucket}/ContactTables.template
+          - {TempBucket: !Ref TemplateBucket }
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 44768a4b-9921-4ee2-a852-8787f700fca5
+  ContactLookUpLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "index.handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-lookup/${ZipCodeName}"
+      Runtime: "nodejs6.10"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactTable}
+  ContactSaveLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "index.handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-save/${ZipCodeName}"
+      Runtime: "nodejs6.10"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactTable}
+  ContactUpdateContactLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-update-contact/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactTable}
+  ContactGetContactsLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-get-contacts/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE_CONTACTS: !Sub ${ContactTables.Outputs.ContactTable}
+          TABLE_CONTACT_HISTORY: !Sub ${ContactTables.Outputs.ContactHistoryTable}
+          TABLE_CONTACT_CALLBACK_REQUEST: !Sub ${ContactTables.Outputs.ContactCallbackQueueTable}
+
+  ContactCheckAlertLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-check-alert/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactHistoryTable}
+          API_ENDPOINT: '<PUT API URL HERE>/allow-call'
+          TOPIC: !Sub ${SNSTopic.Outputs.AlertTopic}
+  ContactAlertLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteAndSNSRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-alert/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactHistoryTable}
+          API_ENDPOINT: '<PUT API URL HERE>/allow-call'
+          TOPIC: !Sub ${SNSTopic.Outputs.AlertTopic}
+          NUMBER: !Ref OwnersPhoneNumber
+  ContactAllowLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "index.handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-allow/${ZipCodeName}"
+      Runtime: "nodejs6.10"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactHistoryTable}
+  ContactInitiateCallbackLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.OutboundCallerRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-initiate-callback/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          CONTACT_FLOW_ID: !Ref CallbackContactFlowId
+          INSTANCE_ID: !Ref InstanceId
+          SOURCE_PHONE_NUMBER: !Ref ContactInstancePhoneNumber
+  ContactRequestCallbackLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteAndSNSRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-request-callback/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactCallbackQueueTable}
+          TOPIC: !Sub ${SNSTopic.Outputs.AlertTopic}
+  ContactRemoveCallbackLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-remove-callback/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactCallbackQueueTable}
+  ContactPutAvailabilityLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-put-availability/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactAvailabilityTable}
+  
+  ContactGetAvailabilityLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-get-availability/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactAvailabilityTable}
+  ContactSaveMessageLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteAndSNSRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-save-message/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          TABLE: !Sub ${ContactTables.Outputs.ContactHistoryTable}
+          NUMBER: !Ref OwnersPhoneNumber
+          TOPIC: !Sub ${SNSTopic.Outputs.AlertTopic}
+  ContactSendMessageLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:      
+      Handler: "lambda_function.lambda_handler"
+      Role: !Sub ${IAMRoles.Outputs.DynamoDBReadWriteAndSNSRole}
+      Code:
+        S3Bucket: !Ref TemplateBucket
+        S3Key: !Sub "lambda-code/contact-send-message/${ZipCodeName}"
+      Runtime: "python2.7"
+      Environment:
+        Variables:
+          S3_URL: !Ref S3StaticBucket
+
+  LambdaInvokePermissionContactLookup:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactLookUpLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+  LambdaInvokePermissionContactSave:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactSaveLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+  LambdaInvokePermissionContactCheckAlert:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactCheckAlertLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+  LambdaInvokePermissionContactAlert:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactAlertLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+  LambdaInvokePermissionContactInitiateCallback:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactInitiateCallbackLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+  LambdaInvokePermissionContactRequestCallback:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactRequestCallbackLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+  LambdaInvokePermissionContactGetAvailability:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactGetAvailabilityLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+  LambdaInvokePermissionContactSendMessage:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ContactSendMessageLambda.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'connect.amazonaws.com'
+      SourceAccount: !Ref 'AWS::AccountId'
+
+  APIGateway:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        lambdaGetContactsArn: !GetAtt ContactGetContactsLambda.Arn
+        lambdaUpdateContactArn: !GetAtt ContactUpdateContactLambda.Arn
+        lambdaRemoveCallbackArn: !GetAtt ContactRemoveCallbackLambda.Arn
+        lambdaAllowCallArn: !GetAtt ContactAllowLambda.Arn
+        lambdaInitiateCallbackArn: !GetAtt ContactInitiateCallbackLambda.Arn
+        lambdaPutAvailabilityArn: !GetAtt ContactPutAvailabilityLambda.Arn
+        lambdaGetAvailabilityArn: !GetAtt ContactGetAvailabilityLambda.Arn
+        lambdaSaveMessageArn: !GetAtt ContactSaveMessageLambda.Arn
+      TemplateURL: !Sub 
+          - https://s3.amazonaws.com/${TempBucket}/API.template
+          - {TempBucket: !Ref TemplateBucket }

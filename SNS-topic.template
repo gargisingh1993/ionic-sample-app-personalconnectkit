@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  'AWS::CloudFormation::Designer':
+    e2be3f9b-d9e0-482c-afb2-c3ac101998cb:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 577
+        'y': 218
+      z: 0
+      embeds: []
+    29521632-ef36-4e73-a480-182e9121234a:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 539
+        'y': 373
+      z: 0
+      embeds: []
+      isassociatedwith:
+        - e2be3f9b-d9e0-482c-afb2-c3ac101998cb
+    a433da1c-2598-4c3c-aaee-20ea75a7c333:
+      source:
+        id: 29521632-ef36-4e73-a480-182e9121234a
+      target:
+        id: e2be3f9b-d9e0-482c-afb2-c3ac101998cb
+      z: 1
+Parameters:
+  SubscriberNumber:
+    Type: String
+    Description: Phone number of person to receive alerts
+Resources:
+  AlertTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      DisplayName: AlertTopic
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: e2be3f9b-d9e0-482c-afb2-c3ac101998cb
+  SNSS3IKKE:
+    Type: 'AWS::SNS::Subscription'
+    Properties:
+      TopicArn: !Ref AlertTopic
+      Endpoint: !Ref SubscriberNumber
+      Protocol: sms
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 29521632-ef36-4e73-a480-182e9121234a
+Outputs:
+  AlertTopic:
+    Description:  SNS Topic for alerts
+    Value: !Ref AlertTopic
+    Export:
+      Name: !Sub "${AWS::StackName}-SNS-Topic"

@@ -1,0 +1,232 @@
+Metadata:
+  'AWS::CloudFormation::Designer':
+    7cd28aad-bab7-48da-abe5-a3753b8ee67b:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 630
+        'y': 240
+      z: 1
+      embeds: []
+    d7d32710-60a2-4296-935f-5f756d5a30d5:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 60
+        'y': 90
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - f3945ea6-cf04-491d-9f77-7d7f90b0e049
+        - 7e33bd5e-5c09-4965-8a3f-b267a3b4c062
+        - 7cd28aad-bab7-48da-abe5-a3753b8ee67b
+    06cba537-ceda-4188-b9a0-235c89040d24:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 180
+        'y': 90
+      z: 1
+      embeds: []
+      isassociatedwith:
+        - f3945ea6-cf04-491d-9f77-7d7f90b0e049
+        - 7e33bd5e-5c09-4965-8a3f-b267a3b4c062
+    f3945ea6-cf04-491d-9f77-7d7f90b0e049:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 300
+        'y': 90
+      z: 1
+      embeds: []
+    7e33bd5e-5c09-4965-8a3f-b267a3b4c062:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 420
+        'y': 90
+      z: 1
+      embeds: []
+    2f5b04a1-8f55-4fcd-a6cb-70bd6e4aeda9:
+      source:
+        id: 06cba537-ceda-4188-b9a0-235c89040d24
+      target:
+        id: f3945ea6-cf04-491d-9f77-7d7f90b0e049
+      z: 2
+    7e0f10b8-081b-41a1-8426-5b4359f77b0d:
+      source:
+        id: 06cba537-ceda-4188-b9a0-235c89040d24
+      target:
+        id: 7e33bd5e-5c09-4965-8a3f-b267a3b4c062
+      z: 3
+    06c59547-9da4-4df3-b414-6781f58c453a:
+      source:
+        id: d7d32710-60a2-4296-935f-5f756d5a30d5
+      target:
+        id: f3945ea6-cf04-491d-9f77-7d7f90b0e049
+      z: 4
+    3137ce72-15a1-444d-9274-a81ea7d5795c:
+      source:
+        id: d7d32710-60a2-4296-935f-5f756d5a30d5
+      target:
+        id: 7e33bd5e-5c09-4965-8a3f-b267a3b4c062
+      z: 5
+    8a8cd47f-3efd-4592-8eca-d99fadb98c4d:
+      source:
+        id: d7d32710-60a2-4296-935f-5f756d5a30d5
+      target:
+        id: 7cd28aad-bab7-48da-abe5-a3753b8ee67b
+      z: 6
+Resources:
+  DynamoDBRW:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: DynamoDB-R-W
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'dynamodb:DeleteItem'
+              - 'dynamodb:GetItem'
+              - 'dynamodb:PutItem'
+              - 'dynamodb:Scan'
+              - 'dynamodb:UpdateItem'
+              - 'dynamodb:Query'
+            Resource: '*'
+      Roles:
+        - !Ref DynamoDBReadWriteRole
+        - !Ref DynamoDBReadWriteAndSNSRole
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7cd28aad-bab7-48da-abe5-a3753b8ee67b
+  SNSPublish:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: SNS-Publish
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'SNS:Publish'
+            Resource: '*'
+      Roles:
+        - !Ref DynamoDBReadWriteAndSNSRole
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 7e33bd5e-5c09-4965-8a3f-b267a3b4c062
+  CloudWatchLogger:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: CloudWatch-logger
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'logs:CreateLogGroup'
+            Resource: '*'
+      Roles:
+        - !Ref DynamoDBReadWriteRole
+        - !Ref DynamoDBReadWriteAndSNSRole
+        - !Ref OutboundCallerRole
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: f3945ea6-cf04-491d-9f77-7d7f90b0e049
+  ComprehendUser:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: ComprehendUser
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'comprehend:*'
+            Resource: '*'
+      Roles:
+        - !Ref DynamoDBReadWriteAndSNSRole
+  
+  InitiateCallBack:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: Initiate-Connect-InitiateCallBack
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'connect:StartOutboundVoiceContact'
+            Resource: '*'
+      Roles:
+        - !Ref OutboundCallerRole
+  
+  DynamoDBReadWriteRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 06cba537-ceda-4188-b9a0-235c89040d24
+  DynamoDBReadWriteAndSNSRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: d7d32710-60a2-4296-935f-5f756d5a30d5
+  OutboundCallerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+Outputs:
+  DynamoDBReadWriteRole:
+    Description: The Arn of the DynamoDBReadWriteRole
+    Value: !GetAtt DynamoDBReadWriteRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-DynamoDBWRRole"
+  DynamoDBReadWriteAndSNSRole:
+    Description: The Arn of the DynamoDBReadWriteAndSNSRole
+    Value: !GetAtt DynamoDBReadWriteAndSNSRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-DynamoDBWR-SNS-Role"
+  OutboundCallerRole:
+    Description: The Arn of the OutboundCallerRole
+    Value: !GetAtt OutboundCallerRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-OutboundCallerRole-Role"

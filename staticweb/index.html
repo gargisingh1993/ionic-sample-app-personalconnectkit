@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Connect Message Center</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script type="text/javascript">
+	function saveMessage() {
+	
+		var url_s = '<PUT API URL HERE>';
+		var mes = comment.value;
+		var dat = JSON.stringify({'Message': mes,'ContactId':getUrlVars()['id']})
+		$.ajax({
+			method: 'POST',
+			url: url_s,
+			data: dat,
+			contentType: 'application/json',
+			success: completeRequest,
+			error: ajaxError
+		});
+    }
+	function getUrlVars() {
+		var vars = {};
+		var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+			vars[key] = value;
+		});
+		return vars;
+	}
+	function completeRequest(result) {
+		alert('Message successfully saved!');
+		console.log(result);
+	}
+	
+	function ajaxError (jqXHR, textStatus, errorThrown) {
+		console.error('Error: ', textStatus, ', Details: ', errorThrown);
+		console.error('Response: ', jqXHR.responseText);		
+		alert('An error occured:\n' + jqXHR.responseText);
+	}
+  </script>
+  <style>
+    /* Remove the navbar's default margin-bottom and rounded borders */ 
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+    
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 450px}
+    
+    /* Set gray background color and 100% height */
+    .sidenav {
+      padding-top: 20px;
+      background-color: #f1f1f1;
+      height: 100%;
+    }
+    
+    /* Set black background color, white text and some padding */
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+    }
+    
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height:auto;} 
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      
+      <a class="navbar-brand" href="#">Amazon Connect Contact Center</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      
+    </div>
+  </div>
+</nav>
+  
+<div class="container-fluid text-center">    
+  <div class="row content">
+    <div class="col-sm-2 sidenav">
+
+    </div>
+    <div class="col-sm-8 text-left"> 
+      <h1>Hello</h1>
+      <p>Thank you for contacting me.  Please record your message below and I will get back to you as soon as I can.</p>
+      <hr>
+      <div class="form-group">
+        <label for="comment">Your message:</label>
+        <textarea class="form-control" rows="5" id="comment"></textarea>
+        <br>
+        <input class="btn btn-primary" type="submit" value="Submit" onclick="saveMessage()">
+      </div>
+      <hr>
+      <h3>What is this and how did I do it?</h3>
+      <p>Eventual Github Link</p>
+    </div>
+    <div class="col-sm-2 sidenav">
+
+    </div>
+  </div>
+</div>
+
+<footer class="container-fluid text-center">
+  <p>Powered by Amazon Connect</p>
+</footer>
+
+</body>
+</html>
