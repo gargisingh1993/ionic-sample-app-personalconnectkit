@@ -1,2 +1,2 @@
-aws-mobile-ionic-sample
+ionic-sample-app-personalconnectkit
 Copyright 2017 - 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
