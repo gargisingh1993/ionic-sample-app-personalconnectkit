@@ -27,6 +27,7 @@ Everyone in a customer facing role runs into a particular question: do you provi
 >* Actions -> Import
 >* Upload the contactbot-lex.zip file from the lex directory
 >* Create
+>* Build the Lex bot
 
 # Create the Amazon Connect Instance
 
@@ -60,6 +61,7 @@ Everyone in a customer facing role runs into a particular question: do you provi
 
 
 
+
 # Launch the Cloudformation Stack
 * Open CloudFormation
 * Create new Stack
@@ -75,7 +77,63 @@ Everyone in a customer facing role runs into a particular question: do you provi
 # Wait
 * Go get a cup of coffee
 * Look out the window
-* Check out cat memes on the internet
+* Look up cat memes on the internet
+
+# Update A few things...
+* You'll need to get the API URL from API GATEWAY and update it in a few locations
+>* In the API_ENDPOINT variable in ContactCheckAlertLambda and ContactAlertLambda
+>* In the index.html page for your static web site
+* Enter the URL everywhere you see <PUT API URL HERE>
 
 # Connect Amazon Connect to your new Resources
+* Open up the Lambda console, you should see a number of new functions created by Cloudformation.  You'll need the arns for these resources.
+* Open up the Amazon Connect console. Now you'll need to import the remaining contact flows.  Since certain contact flows have dependencies, you should import them in the following order.  For each lambda function, replace the function name provided with the actual ARN of the function with the same name.
+>* Wait for Response
+>>* Create new Customer queue flow
+>>* Import Wait for Response
+>>* Update
+>>* Replace ContactCheckAlertLambda with ARN
+>>* Replace ContactRequestCallbackLambda with ARN
+>>* In Transfer to Phone Number block, replace the endpoint to your phone number and select your new claimed phone number as the Caller ID number 
+>>* Save and Publish
+>* Wait for Response flow 
+>>* Create new Contact flow
+>>* Import Wait for Response Flow
+>>* You should see warnings saying "Could not resolve ARN, so resolving to resource with the same name".  This is fine.
+>>* Save and Publish
+>* Request Callback
+>>* Create new Contact flow
+>>* Import Request Callback
+>>* Replace ContactRequestCallbackLambda with ARN
+>>* Save and Publish
+>* Check Availability
+>>* Create new Contact flow
+>>* Import Check Availability
+>>* Replace ContactGetAvailabilityLambda with ARN
+>>* Save and Publish
+>* Record a Message
+>>* Create new Contact flow
+>>* Import Record a message
+>>* Replace ContactSendMessageLambda with ARN
+>>* Save and Publish
+>* General Workflow
+>>* New Contact Flow
+>>* Import General Workflow
+>>* Replace ContactAlertLambda with ARN
+>>* Save and Publish
+>* Register
+>>* Import Register
+>>* Replace ContactSaveLambda with ARN
+>>* Save and Publish
+>* Data Dip
+>>* New Contact Flow
+>>* Import Data Dip
+>>* Replace ContactLookUpLambda with ARN
+>>* Save and Publish
+* Connect your contact center's phone number to the Data Dip flow
+>* Under Routing and Phone Numbers
+>* Select the phone number and select Data Dip under Contact flow
+* Contact your AWS Rep and ask them to add you to the PFR requesting Cloudformation support for Connect
+
+## Give yourself a call
 
