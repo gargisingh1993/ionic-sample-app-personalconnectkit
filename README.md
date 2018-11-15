@@ -89,7 +89,7 @@ First clone this repo: `git clone https://github.com/gargisingh1993/ionic-sample
 
 The following steps outline how you can build and deploy the application to a hosted webserver with global CDN on AWS (using S3 and CloudFront) created by the Import phase above:
 
-1.  Navigate to `./aws-mobile-ionic-sample/client` and build for production by running:
+1.  Navigate to `./ionic-sample-master-subtree/client` and build for production by running:
 
     ```bash
     npm run build
